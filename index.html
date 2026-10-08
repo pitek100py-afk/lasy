@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lasy w Polsce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1d14; --ink:#e4ecd9; --muted:#9db3a0; --board:#25593a; --boardink:#eef4e2; --line:#2b4a35; --lime:#a9d04f;
+  --red:#c2331f; --blue:#1d5fa6; --green:#2a7a35; --yellow:#e2b91c; --white:#f7f7f2;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){--bg:#dde8d3; --ink:#14231a; --muted:#46594b; --board:#2a6240; --boardink:#f0f6e6; --line:#a9bd9e; --lime:#2f6b1f;}
+}
+:root[data-theme="light"]{--bg:#dde8d3; --ink:#14231a; --muted:#46594b; --board:#2a6240; --boardink:#f0f6e6; --line:#a9bd9e; --lime:#2f6b1f;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.65 Literata,Georgia,serif}
+h1,h2,h3,.btn,summary,.tabs button{font-family:'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.01em}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.wrap{max-width:680px;margin:0 auto;padding:0 18px}
+/* deska */
+.board{position:relative;background:
+  repeating-linear-gradient(90deg,rgba(0,0,0,.07) 0 2px,transparent 2px 9px),
+  var(--board);
+  color:var(--boardink);padding:16px 40px 14px 24px;border-radius:2px;box-shadow:0 2px 0 rgba(0,0,0,.35)}
+.board::before,.board::after{content:"";position:absolute;top:50%;width:9px;height:9px;margin-top:-4px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#b9b3a4,#5d584d)}
+.board::before{right:14px}
+.board::after{display:none}
+.board h1,.board h2{margin:0;font-weight:700;line-height:1;text-transform:none}
+.board h1{font-size:clamp(3rem,14vw,5.6rem)}
+.board h2{font-size:clamp(1.9rem,7vw,2.6rem)}
+/* znak szlaku */
+.blaze{display:inline-block;width:13px;height:24px;border:1px solid rgba(0,0,0,.35);background:linear-gradient(var(--white) 0 32%,var(--c,var(--red)) 32% 68%,var(--white) 68%);vertical-align:middle}
+.marks{display:flex;gap:8px;margin:14px 0 0}
+section{padding:46px 0 0}
+section>.board{margin-bottom:20px}
+p{margin:0 0 14px}
+.intro{margin:22px 0 0;font-size:1.1rem}
+.small{color:var(--muted);font-size:.95rem}
+/* fakty */
+.facts{list-style:none;margin:0;padding:0}
+.facts li{display:grid;grid-template-columns:20px 1fr;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.facts li:last-child{border:0}
+.facts b{font-weight:600}
+.facts .blaze{margin-top:5px}
+/* gra */
+.game{border:2px solid var(--ink);padding:20px}
+.game .n{font-family:'Barlow Condensed',sans-serif;font-weight:600;color:var(--muted)}
+.game .q{font-size:1.35rem;line-height:1.35;min-height:4.2em;margin:6px 0 14px;font-weight:600}
+.row{display:flex;gap:10px}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;flex:1;text-align:center;padding:12px 16px;border:2px solid var(--ink);font-size:1.25rem;font-weight:700}
+.btn:hover{background:var(--ink);color:var(--bg)}
+.res{min-height:3.4em;margin-top:14px;display:flex;gap:10px;align-items:flex-start}
+.res .blaze{flex:none;margin-top:4px}
+/* słupki */
+.bar{display:grid;grid-template-columns:76px 1fr 42px;gap:10px;align-items:center;margin:6px 0;font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:600}
+.track{height:14px;border:1px solid var(--ink)}
+.fill{height:100%;width:0;background:var(--lime);transition:width 1s ease-out}
+.bar em{font-style:normal;text-align:right}
+/* miejsca */
+details{border-top:1px solid var(--line)}
+details:last-of-type{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;padding:14px 0;font-size:1.4rem;font-weight:700;list-style:none;display:flex;justify-content:space-between}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-weight:400}
+details[open] summary::after{content:"–"}
+details p{color:var(--muted)}
+/* zwierzęta */
+.tabs{display:flex;flex-wrap:wrap;gap:4px 18px;margin-bottom:12px}
+.tabs button{all:unset;cursor:pointer;font-size:1.35rem;font-weight:600;padding:4px 0;border-bottom:3px solid transparent;color:var(--muted)}
+.tabs button[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--red)}
+.tabs button:focus-visible{outline:3px solid var(--blue)}
+#ainfo{min-height:5.5em}
+/* zasady */
+.rules{margin:0;padding:0;list-style:none}
+.rules li{padding:10px 0 10px 24px;position:relative;border-bottom:1px solid var(--line)}
+.rules li::before{content:"";position:absolute;left:0;top:17px;width:10px;height:3px;background:var(--ink)}
+.rules strong{font-weight:600}
+.share{padding:52px 0 8px}
+.share .btn{display:inline-block;flex:none;background:var(--lime);color:#10200a;border-color:var(--lime);padding:12px 26px;text-decoration:none}
+footer{padding:26px 0 44px;color:var(--muted);font-size:.85rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header style="padding-top:44px">
+  <div class="board"><h1>Lasy w Polsce</h1></div>
+  <div class="marks" aria-hidden="true">
+    <span class="blaze" style="--c:var(--red)"></span><span class="blaze" style="--c:var(--blue)"></span><span class="blaze" style="--c:var(--green)"></span><span class="blaze" style="--c:var(--yellow)"></span>
+  </div>
+  <p class="intro">Kilka rzeczy o lesie, które fajnie wiedzieć przed następnym wyjściem. Krótko, bez ściemy, na dole mała gra.</p>
+</header>
+
+<section>
+  <div class="board"><h2>Wiedziałeś, że…</h2></div>
+  <ul class="facts">
+    <li><span class="blaze"></span><span><b>Lasu przybywa.</b> Po wojnie las zajmował około 21% kraju, dziś mniej więcej 30%.</span></li>
+    <li><span class="blaze" style="--c:var(--blue)"></span><span><b>Pod ziemią są połączenia.</b> Korzenie wielu drzew oplata grzybnia. Część badaczy uważa, że drzewa wymieniają przez nią składniki, ale skala tego zjawiska to wciąż temat sporów.</span></li>
+    <li><span class="blaze" style="--c:var(--green)"></span><span><b>Martwe drzewo to nie śmieć.</b> Leżący pień to dom dla grzybów, owadów i dzięciołów, dlatego w parkach narodowych go zostawiają.</span></li>
+    <li><span class="blaze" style="--c:var(--yellow)"></span><span><b>Bielik ma ponad 2 metry rozpiętości skrzydeł.</b> To największy polski ptak drapieżny.</span></li>
+    <li><span class="blaze"></span><span><b>Żubr prawie zniknął.</b> Dziś żyje w Polsce ponad 2 tysiące na wolności.</span></li>
+    <li><span class="blaze" style="--c:var(--blue)"></span><span><b>Teraz trwa rykowisko.</b> Jesienią samce jeleni ryczą i walczą o samice. Najlepiej słychać je o świcie.</span></li>
+  </ul>
+</section>
+
+<section>
+  <div class="board"><h2>Prawda czy fałsz</h2></div>
+  <div class="game">
+    <div class="n" id="score"></div>
+    <div class="q" id="q"></div>
+    <div class="row"><button class="btn" id="t">Prawda</button><button class="btn" id="f">Fałsz</button></div>
+    <div class="res" id="res" aria-live="polite"></div>
+  </div>
+</section>
+
+<section>
+  <div class="board"><h2>Jakie drzewa tu rosną</h2></div>
+  <p class="small">Orientacyjny udział w powierzchni lasów. Sosna wygrywa z dużą przewagą, bo radzi sobie na piaskach.</p>
+  <div id="bars"></div>
+</section>
+
+<section>
+  <div class="board"><h2>Gdzie warto pojechać</h2></div>
+  <details><summary>Puszcza Białowieska</summary><p>Jeden z najlepiej zachowanych lasów nizinnych w Europie, wpisany na listę UNESCO. Stare drzewa, dużo martwego drewna i żubry.</p></details>
+  <details><summary>Bory Dolnośląskie</summary><p>Jeden z największych zwartych kompleksów leśnych w kraju, głównie sosnowy, w zachodniej Polsce.</p></details>
+  <details><summary>Puszcza Kampinoska</summary><p>Prawdziwa puszcza tuż obok Warszawy: wydmy, bagna i grądy. To też rezerwat biosfery UNESCO.</p></details>
+  <details><summary>Bory Tucholskie</summary><p>Sosny, jeziora i rzeki na Pomorzu. Dobre na rower albo kajak.</p></details>
+  <details><summary>Puszcza Piska</summary><p>Leśna część Mazur: jeziora, torfowiska i dużo ciszy.</p></details>
+</section>
+
+<section>
+  <div class="board"><h2>Kto tu mieszka</h2></div>
+  <div class="tabs" id="tabs" role="group" aria-label="Zwierzęta"></div>
+  <p id="ainfo" aria-live="polite"></p>
+</section>
+
+<section>
+  <div class="board"><h2>Jak się zachować</h2></div>
+  <ul class="rules">
+    <li><strong>Ciszej.</strong> Zwierzęta słyszą Cię z daleka, im ciszej idziesz, tym więcej zobaczysz.</li>
+    <li><strong>Śmieci zabierasz.</strong> Wszystko, co przyniosłeś, wraca z Tobą.</li>
+    <li><strong>Żadnego ognia</strong> poza wyznaczonymi miejscami. Latem las pali się błyskawicznie.</li>
+    <li><strong>Grzyby tylko znane.</strong> Masz wątpliwość, zostawiasz.</li>
+    <li><strong>Pies na smyczy,</strong> szczególnie wiosną, kiedy ptaki mają lęgi, a zwierzęta młode.</li>
+  </ul>
+</section>
+
+<div class="share">
+  <a class="btn" href="https://www.tiktok.com/@piteek100" target="_blank" rel="noopener">Wpadnij na TikToka</a>
+  <p class="small" style="margin-top:10px">@piteek100</p>
+</div>
+
+<footer>Liczby są zaokrąglone i orientacyjne (GUS, Lasy Państwowe).</footer>
+</div>
+
+<script>
+var qs=[
+ ["Mech zawsze rośnie od północnej strony drzewa.",false,"Fałsz. Mech rośnie tam, gdzie wilgotno i cieniście, więc nie zawsze od północy."],
+ ["Sosna to najczęstsze drzewo w polskich lasach.",true,"Prawda. Ma ponad połowę udziału w powierzchni lasów."],
+ ["Żubr w XX wieku był prawie wymarły.",true,"Prawda. Odbudowano go z niewielkiej grupy zwierząt z hodowli."],
+ ["Grzyb z pierścieniem na trzonie jest zawsze jadalny.",false,"Fałsz. Pierścień ma też śmiertelnie trujący muchomor sromotnikowy."],
+ ["Wilk w Polsce jest pod ochroną.",true,"Prawda. Wilk jest objęty ochroną gatunkową."]
+];
+var i=0,sc=0,done=false;
+var q=document.getElementById('q'),res=document.getElementById('res'),sEl=document.getElementById('score'),t=document.getElementById('t'),f=document.getElementById('f');
+function mark(ok){return '<span class="blaze" style="--c:'+(ok?'var(--green)':'var(--red)')+'"></span>'}
+function show(){
+  done=false;res.innerHTML='';
+  if(i>=qs.length){
+    sEl.textContent='Koniec';
+    q.textContent='Wynik: '+sc+' na '+qs.length+'. '+(sc>=4?'Z lasu wyjdziesz bez map.':sc>=2?'Nieźle, ale parę rzeczy do poprawki.':'Przeczytaj sekcję wyżej i spróbuj jeszcze raz.');
+    t.textContent='Jeszcze raz';f.style.display='none';t.onclick=function(){i=0;sc=0;f.style.display='';t.textContent='Prawda';show()};
+    return;
+  }
+  sEl.textContent='Pytanie '+(i+1)+' z '+qs.length;
+  q.textContent=qs[i][0];
+  t.onclick=function(){ans(true)};f.onclick=function(){ans(false)};
+}
+function ans(v){
+  if(done)return;done=true;
+  var ok=v===qs[i][1];if(ok)sc++;
+  res.innerHTML=mark(ok)+'<span>'+qs[i][2]+'</span>';
+  setTimeout(function(){i++;show()},2800);
+}
+show();
+
+var sp=[["Sosna",58],["Brzoza",8],["Dąb",7],["Buk",6],["Świerk",6],["Olcha",5]];
+var b=document.getElementById('bars');
+sp.forEach(function(s){var d=document.createElement('div');d.className='bar';d.innerHTML='<span>'+s[0]+'</span><div class="track"><div class="fill" data-w="'+s[1]+'"></div></div><em>'+s[1]+'%</em>';b.appendChild(d)});
+new IntersectionObserver(function(e,o){e.forEach(function(x){if(x.isIntersecting){b.querySelectorAll('.fill').forEach(function(f){f.style.width=(f.dataset.w/58*100)+'%'});o.disconnect()}})},{threshold:.3}).observe(b);
+
+var an=[
+ ["Żubr","Największy lądowy ssak Europy. Najwięcej żyje w Puszczy Białowieskiej i na Podlasiu."],
+ ["Wilk","Płochliwy drapieżnik żyjący w watahach. Pomaga trzymać w ryzach liczebność jeleni i dzików."],
+ ["Ryś","Największy dziki kot w Polsce. Samotnik z pędzelkami na uszach, praktycznie nie do zobaczenia."],
+ ["Bielik","Największy polski ptak drapieżny. Gniazduje na starych drzewach blisko wody."],
+ ["Dzięcioł","Wydłubuje dziuple, w których potem mieszkają sikorki, nietoperze i wiewiórki."],
+ ["Jeleń","Jesienią ryczy na rykowisku. Najlepiej usłyszeć go o świcie."]
+];
+var tb=document.getElementById('tabs'),ai=document.getElementById('ainfo');
+function pick(k){tb.querySelectorAll('button').forEach(function(c,j){c.setAttribute('aria-pressed',j===k)});ai.textContent=an[k][1]}
+an.forEach(function(a,k){var c=document.createElement('button');c.setAttribute('aria-pressed','false');c.textContent=a[0];c.onclick=function(){pick(k)};tb.appendChild(c)});
+pick(0);
+
+</script>
+</body>
+</html>
